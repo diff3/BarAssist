@@ -8,8 +8,10 @@
 ## SavedVariablesPerCharacter: BA_Vars
 
 init.lua
+localizations.lua
 BarAssist.xml
 BarAssistEvents.lua
 BarAssistSlashes.lua
 BarAssist.lua
 BarAssistActionButtons.lua
+BarAssistBindings.lua

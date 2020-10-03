@@ -17,10 +17,6 @@ function bar:ADDON_LOADED(self, event)
     if event == "BarAssist" then
       print("BarAssist loaded");
 
-      BINDING_HEADER_BARASSIST = "BarAssist";
-      BINDING_NAME_ghostOpenHide = "View frame";
-      BINDING_NAME_BarAssistButton1 = "Button 1";
-
       -- It's not until now all between session variables is loaded, if we
       -- run init or create all before this point we will reciev an error
       bar:init_vars()

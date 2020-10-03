@@ -12,7 +12,7 @@ function retrievCursorItem(self, event, ...)
 end
 
 function startMov(self, event, ...)
-    self:StartMoving()
+    self:StartMoving();
 end
 
 function stopMov(self, event, ...)
@@ -20,7 +20,7 @@ function stopMov(self, event, ...)
 end
 
 function test22()
-  StaticPopup_Show ("EXAMPLE_HELLOWORLD")
+  StaticPopup_Show("EXAMPLE_HELLOWORLD");
 end
 
 function test23()
@@ -41,7 +41,7 @@ function test23()
       bar.buttons[0][i]['button'] = button
     end
   else
-    -- This function turn on the edit mode, and deactivate all buttons
+    -- This function turn on the edit mode, and reactivate all buttons
     item3:Show();
     ends = bar:countTable()
     for i=0, ends -1, 1
@@ -125,12 +125,4 @@ function bar:createAll()
   end
 
   bar.Menu:Show();
-end
-
-function BarAssistShowFrame()
-  if (keystate == "down") then
-  bar.Menu:Show();
-  else
-  bar.Menu:Hide();
-  end
 end

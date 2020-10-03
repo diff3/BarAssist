@@ -106,6 +106,9 @@ function bar:BarAssistRetrieveCursorItem(test)
     local infoType, info1, info2 = GetCursorInfo()
     local nameData, rank, textureData, link, ID
 
+    nameData = infoType
+    ID = info1
+
     if infoType == "spell" then
       nameData, rank = GetSpellBookItemName( info1, info2 );
       textureData = GetSpellTexture(nameData);
@@ -115,6 +118,33 @@ function bar:BarAssistRetrieveCursorItem(test)
     elseif infoType == "macro" then
       nameData, textureData, _ = GetMacroInfo(info1);
       ID = info1
+    elseif cursorType == "companion" then
+  			_, nameData = GetCompanionInfo(info1, info2);
+  	elseif cursorType == "item" then
+  			_, link, _, _, _, _, _, _, _, itemTexture, _ = GetItemInfo(cursorData);
+  			local _, _, parts = strsplit("|", link);
+  			_, ID = strsplit(":", parts);
+    elseif cursorType == "mount" then
+      --local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, hideOnChar, isCollected;
+      --creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, hideOnChar, isCollected, mountID = C_MountJournal.GetMountInfoByID(cursorData);
+      --DEFAULT_CHAT_FRAME:AddMessage(creatureName);
+
+    --local link = GetSpellLink(cursorData, cursorSubType);
+   --	local _, _, parts = strsplit("|", link);
+    --	_, itemID = strsplit(":", parts);
+      -- cursorData =;
+
+  	elseif cursorType == "battlepet" then
+      -- local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(cursorData)
+
+		-- speciesId, petGUID = C_PetJournal.FindPetIDByName(name)
+		--	DEFAULT_CHAT_FRAME:AddMessage("creatureID" .. creatureID )
+		--	DEFAULT_CHAT_FRAME:AddMessage("name: " .. name);
+
+		--	DEFAULT_CHAT_FRAME:AddMessage("speciesId: " .. speciesId);
+		--	DEFAULT_CHAT_FRAME:AddMessage(C_PetJournal.GetPetSummonInfo(petGUID));
+		--	DEFAULT_CHAT_FRAME:AddMessage(C_PetJournal.SummonPetByGUID(petGUID));
+		--	DEFAULT_CHAT_FRAME:AddMessage("petGUID: " .. petGUID);
     end
 
     ClearCursor();

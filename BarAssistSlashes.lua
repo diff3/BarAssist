@@ -24,6 +24,9 @@ function bar.SlashHandler(msg, editbox)
         bar.buttons = {}
         bar:init_vars()
         bar:createAll()
+    elseif msg == 'macro' then
+      -- ShowMacroFrame()
+      _G['MacroPopupFrame']:Show();
     else
         print(name .. ": Usages /ba help");
     end

@@ -1,5 +1,7 @@
 # Assets
 
+## music
+https://www.youtube.com/watch?v=I-cC3wSKAGk
 
 ## Frame
 https://wow.gamepedia.com/API_CreateFrame
@@ -18,6 +20,7 @@ https://www.tutorialspoint.com/lua/lua_tables.htm
 https://stackoverflow.com/questions/2705793/how-to-get-number-of-entries-in-a-lua-table
 https://stackoverflow.com/questions/12674345/lua-retrieve-list-of-keys-in-a-table
 https://www.tutorialspoint.com/lua/lua_tables.htm
+http://lua-users.org/wiki/TablesTutorial
 
 ## spells
 https://classic.wowhead.com/spell=2645/ghost-wolf
@@ -27,6 +30,7 @@ https://wow.gamepedia.com/Creating_key_bindings#Specifying_bindings
 
 ## macro conditionals
 https://wow.gamepedia.com/Macro_conditionals
+https://wowwiki.fandom.com/wiki/API_GetMacroIconInfo
 
 ## addons examble
 https://github.com/diff3/Ghost
