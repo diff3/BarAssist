@@ -1,0 +1,9 @@
+<Bindings>
+  <!-- Just som test with bindings -->
+	<Binding name="ghostOpenHide" runOnUp="true" header="BARASSIST">
+		BarAssistShowFrame();
+	</Binding>
+	<Binding name="BarAssistButton1" runonUp="true">
+		if(keystate=="down") then local button = getglobal("BarAssistButton1"); UseAction(button:GetID(), 0, onSelf); end
+	</Binding>
+</Bindings>
