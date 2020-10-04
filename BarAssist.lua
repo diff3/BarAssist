@@ -50,6 +50,7 @@ function editeModeActivation()
       ends = bar:countTable()
     for i=0, ends -1, 1
     do
+      if bar.buttons[0][i]['infoType'] then
       buttonData = bar.buttons[0][i]
       button =  bar.buttons[0][i]['button']
       button:SetAttribute("type", buttonData['infoType']);
@@ -58,6 +59,7 @@ function editeModeActivation()
       button:SetScript("OnDragStart", nil);
       button:SetScript("OnReceiveDrag", nil);
       bar.buttons[0][i]['button'] = button
+    end
     end
   else
     -- This function turn on the edit mode, and reactivate all buttons

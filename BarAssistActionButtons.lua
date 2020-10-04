@@ -52,6 +52,7 @@ function bar:BarAssistPickUpAction(button)
 		PickupSpell(ID);
 	end
 
+  i = button:GetAttribute("index")
   button.Texture = nil
   button.Icon:SetTexture(nil);
   button:SetText(nil)
@@ -59,6 +60,15 @@ function bar:BarAssistPickUpAction(button)
   button.typeID = nil;
   button:SetAttribute("type", nil);
   button = nil
+
+  print(button)
+
+  --i = button:GetAttribute(index)
+  bar.buttons[0][i]['buttonName'] = "Button" .. i;
+  bar.buttons[0][i]['nameData'] = nameData
+  bar.buttons[0][i]['typeID'] = ID;
+  bar.buttons[0][i]['infoType'] = infoType;
+  bar.buttons[0][i]['textureData'] = textureData
 
   -- does not empty any button at the moment
 
@@ -187,6 +197,7 @@ function bar:restoreSaved()
   ends = bar:countTable()
   for i=0, ends-1, 1
   do
+    if bar.buttons[0][i]['infoType'] then
     buttonData = bar.buttons[0][i]
     button = buttonData['button']
     button:SetAttribute("type", buttonData['infoType']);
@@ -196,5 +207,6 @@ function bar:restoreSaved()
     button.Texture = buttonData['textureData']
     button.Icon:SetTexture(buttonData['textureData'])
     button:SetText(buttonData['nameData'])
+  end
   end
 end
