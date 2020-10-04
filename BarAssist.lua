@@ -1,8 +1,6 @@
 -- simple way to share information between files in lua.
 local name, bar = ...
 
-bar.buttons = {}
-
 function pickUpAction(self, event, ...)
   bar:BarAssistPickUpAction(self)
 end
@@ -19,15 +17,36 @@ function stopMov(self, event, ...)
     self:StopMovingOrSizing();
 end
 
-function test22()
-  StaticPopup_Show("EXAMPLE_HELLOWORLD");
+local name, bar = ...
+
+-- Create a popup menu to enter text
+StaticPopupDialogs["EDIT_MENU_TITLE_DIALOG"] = {
+  text = "Enter a new name for menu",
+  button1 = "Save",
+  timeout = 0,
+  whileDead = true,
+  hideOnEscape = true,
+  preferredIndex = 1,
+  OnShow = function (self, data)
+    self.editBox:SetText(header:GetText())
+  end,
+  OnAccept = function (self, data, data2)
+    local text = self.editBox:GetText()
+    header:SetText(text)
+    bar.buttons['headerText'] = text
+  end,
+  hasEditBox = true
+}
+
+function popUpDialog()
+  StaticPopup_Show("EDIT_MENU_TITLE_DIALOG");
 end
 
-function test23()
+function editeModeActivation()
   -- This function turn off the edit mode, and reactivate all buttons
 
-  if item3:IsVisible() then
-    item3:Hide();
+  if editVarning:IsVisible() then
+    editVarning:Hide();
       ends = bar:countTable()
     for i=0, ends -1, 1
     do
@@ -42,7 +61,7 @@ function test23()
     end
   else
     -- This function turn on the edit mode, and reactivate all buttons
-    item3:Show();
+    editVarning:Show();
     ends = bar:countTable()
     for i=0, ends -1, 1
     do
@@ -62,24 +81,6 @@ function test23()
   end
 end
 
--- Create a popup menu to enter text
-StaticPopupDialogs["EXAMPLE_HELLOWORLD"] = {
-  text = "Enter a new name for menu",
-  button1 = "Save",
-  timeout = 0,
-  whileDead = true,
-  hideOnEscape = true,
-  preferredIndex = 1,
-  OnShow = function (self, data)
-    self.editBox:SetText(item:GetText())
-  end,
-  OnAccept = function (self, data, data2)
-    local text = self.editBox:GetText()
-    item:SetText(text)
-  end,
-  hasEditBox = true
-}
-
 function bar:createAll()
   -- Create a Base frame and a button
   bar.Menu = CreateFrame("Frame", "BA_Menu", UIParent, "SecureHandlerBaseTemplate, BA_MenuContainer");
@@ -91,22 +92,22 @@ function bar:createAll()
   bar.Menu:SetBackdropColor(0, 0, 0, 0.9);
 
   -- template text (title)
-  item = CreateFrame("Button", "test", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
-  item:SetPoint("TOP", bar.Menu, "TOP", 0, -5);
-  item:SetText("Healing spells")
-  item:SetScript("OnClick", test22);
+  header = CreateFrame("Button", "TitleButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
+  header:SetPoint("TOP", bar.Menu, "TOP", 0, -5);
+  header:SetText(bar.buttons['headerText'])
+  header:SetScript("OnClick", popUpDialog);
 
   -- Config
-  item2 = CreateFrame("Button", "test1", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
-  item2:SetPoint("BOTTOM", bar.Menu, "BOTTOMRIGHT", -25, 5);
-  item2:SetText("Config")
-  item2:SetScript("OnClick", test23);
+  configButton = CreateFrame("Button", "ConfigButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
+  configButton:SetPoint("BOTTOM", bar.Menu, "BOTTOMRIGHT", -25, 5);
+  configButton:SetText("Config")
+  configButton:SetScript("OnClick", editeModeActivation);
 
   -- EDIT MODE
-  item3 = CreateFrame("Button", "test2", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
-  item3:SetPoint("BOTTOM", bar.Menu, "BOTTOMLEFT", 40, 5);
-  item3:SetText("EDIT MODE")
-  item3:Hide();
+  editVarning = CreateFrame("Button", "EditModeText", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
+  editVarning:SetPoint("BOTTOM", bar.Menu, "BOTTOMLEFT", 40, 5);
+  editVarning:SetText("EDIT MODE")
+  editVarning:Hide();
 
   -- create 3 buttons
   bar.buttons[0][0]['button'] = bar:createButton("BarAssistButton1", bar.Menu, 0)

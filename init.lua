@@ -7,13 +7,10 @@ function bar:init_vars()
 
   bar.buttons = nil
 
-  --if not BA_Vars then
-  --  BA_Vars = {}
-  --end
-
   if not BA_Vars.buttons then
     BA_Vars.buttons = {
       ['move'] = false,
+      ['headerText'] = "PopUp menu",
       [0] = {
         [0] = {
           ['buttonName'] = "Button1",
