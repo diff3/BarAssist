@@ -2,7 +2,18 @@
 local name, bar = ...
 
 function pickUpAction(self, event, ...)
-  bar:BarAssistPickUpAction(self)
+  local button = bar:BarAssistPickUpAction(self)
+  local index = button:GetAttribute("index")
+  local buttonData = {
+    ["buttonName"] = "",
+    ["infoType"] = "",
+    ["typeID"] = "",
+    ["textureData"] = "",
+    ["nameData"] = ""
+  }
+
+  bar:test(button, buttonData)
+  bar:test2(index, buttonData)
 end
 
 function retrievCursorItem(self, event, ...)
@@ -15,43 +26,6 @@ end
 
 function stopMov(self, event, ...)
   self:StopMovingOrSizing();
-end
-function bar:createButtonsNew()
-  local buttonData, button
-  ends = bar:countTable()
-  for i = 0, ends - 1, 1
-  do
-    button = bar.buttons[0][i]['button']
-    if not button then
-      break;
-    end
-    buttonData = bar.buttons[0][i]
-    button:SetScript("PreClick", nil)
-
-    if buttonData['infoType'] == "spell" then
-      button:SetAttribute("type", buttonData['infoType']);
-      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
-    elseif buttonData['infoType'] == "macro" then
-      button:SetAttribute("type", buttonData['infoType']);
-      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
-    elseif buttonData['infoType'] == "item" then
-      button:SetAttribute("type", buttonData['infoType']);
-      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
-    elseif buttonData['infoType'] == "mount" then
-      button:SetScript("PreClick", function(self)
-        C_MountJournal.SummonByID(self['typeID'])
-      end);
-    elseif buttonData['infoType'] == "battlepet" then
-      button:SetScript("PreClick", function(self)
-        C_PetJournal.SummonPetByGUID(tostring(self['typeID']))
-      end);
-    elseif buttonData['infoType'] == "equipmentset" then
-      button:SetScript("PreClick", function(self)
-        C_EquipmentSet.UseEquipmentSet(self['typeID'])
-      end);
-    end
-    bar.buttons[0][i] = buttonData
-  end
 end
 
 -- Create a popup menu to enter text
@@ -66,23 +40,24 @@ StaticPopupDialogs["EDIT_MENU_TITLE_DIALOG"] = {
     self.editBox:SetText(header:GetText())
   end,
   OnAccept = function (self, data, data2)
-      local text = self.editBox:GetText()
+    local text = self.editBox:GetText()
     header:SetText(text)
     bar.buttons['headerText'] = text
   end,
   hasEditBox = true
 }
 
-function popUpDialog()
+function BarAssistPopUpDialog()
   StaticPopup_Show("EDIT_MENU_TITLE_DIALOG");
 end
 
 function editeModeActivation()
   -- This function turn off the edit mode, and reactivate all buttons
+  -- this should be rewritten
+  local ends = bar:countTable()
 
   if editVarning:IsVisible() then
     editVarning:Hide();
-    ends = bar:countTable()
     for i = 0, ends - 1, 1
     do
       if bar.buttons[0][i]['infoType'] then
@@ -94,20 +69,14 @@ function editeModeActivation()
         bar.buttons[0][i]['button'] = button
       end
     end
-    bar:createButtonsNew()
-
+    bar:BarAssistUpdateButtonAction()
   else
     -- This function turn on the edit mode, and reactivate all buttons
     editVarning:Show();
-    ends = bar:countTable()
     for i = 0, ends - 1, 1
     do
       buttonData = bar.buttons[0][i]
       button = bar.buttons[0][i]['button']
-      -- if not button then
-      --  break;
-      -- end
-
       if button:GetAttribute("type") then
         button:SetAttribute(buttonData['infoType'], nil);
         button:SetAttribute("type", nil);
@@ -135,7 +104,7 @@ function bar:createAll()
   header = CreateFrame("Button", "TitleButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
   header:SetPoint("TOP", bar.Menu, "TOP", 0, - 5);
   header:SetText(bar.buttons['headerText'])
-  header:SetScript("OnClick", popUpDialog);
+  header:SetScript("OnClick", BarAssistPopUpDialog);
 
   -- Config
   configButton = CreateFrame("Button", "ConfigButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");

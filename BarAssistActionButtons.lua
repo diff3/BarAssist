@@ -23,157 +23,160 @@ function bar:createButton(buttonName, relativeTo, index)
   return button
 end
 
+function bar:findMountIndex(ID)
+  --[[
+  Pickup action is based on journal index, and not mountID.
+  ]]--
+  local numOfMounts = C_MountJournal.GetNumDisplayedMounts()
+
+  for index = 1, numOfMounts, 1
+  do
+    local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index));
+
+    if mountID == ID then
+      return index
+    end
+  end
+end
 
 function bar:BarAssistPickUpAction(button)
   --[[
   Function for to pickup all types of actions from BarAssist window
   ]]--
 
-  actionType = button.types;
-  ID = button.typeID
-  actionSubType = ""
+  local actionType = button.types;
+  local ID = button.typeID;
 
-  if actionType == "mount" then
-    local index = bar:getFuckingMounth(ID)
-		C_MountJournal.Pickup(index);
-	elseif actionType == "battlepet" then
-		C_PetJournal.PickupPet(ID)
-	elseif actionType == "equipmentset" then
-		C_EquipmentSet.PickupEquipmentSet(ID);
-	elseif actionType == "item" then
-		PickupItem(actionSubType);
-	elseif actionType == "macro" then
-		PickupMacro(ID);
-	elseif actionType == "spell" then
-		PickupSpell(ID);
-	end
-
-  i = button:GetAttribute("index")
-  button.Texture = nil
-  button.Icon:SetTexture(nil);
-  button:SetText(nil)
-  button.types = nil;
-  button.typeID = nil;
-  button:SetAttribute("type", nil);
-  button = nil
-
-  bar.buttons[0][i]['buttonName'] = "Button" .. i;
-  bar.buttons[0][i]['nameData'] = nameData
-  bar.buttons[0][i]['typeID'] = ID;
-  bar.buttons[0][i]['infoType'] = infoType;
-  bar.buttons[0][i]['textureData'] = textureData
-end
-
-function bar:getFuckingMounth(ID)
-  ant = C_MountJournal.GetNumDisplayedMounts()
-
-  for index=1, ant, 1
-  do
-    _,_,_,_,_,_,_,_,_,_,_,mountID = C_MountJournal.GetDisplayedMountInfo(index)
-
-    if mountID == ID then
-      return index
-    end
-
+  if actionType == "battlepet" then
+    C_PetJournal.PickupPet(ID);
+  elseif actionType == "equipmentset" then
+    C_EquipmentSet.PickupEquipmentSet(ID);
+  elseif actionType == "item" then
+    PickupItem(ID );
+  elseif actionType == "macro" then
+    PickupMacro(ID);
+  elseif actionType == "mount" then
+    local index = bar:findMountIndex(ID)
+    C_MountJournal.Pickup(index);
+  elseif actionType == "spell" then
+    PickupSpell(ID);
   end
 
+  return button
 end
 
-function bar:BarAssistPickUpAction2(ID, actionType)
-  --[[
-  Function for to pickup all types of actions from BarAssist window
-  ]]--
-
-  if actionType == "mount" then
-    local index = bar:getFuckingMounth(ID)
-    C_MountJournal.Pickup(index);
-	elseif actionType == "battlepet" then
-		C_PetJournal.PickupPet(ID)
-	elseif actionType == "item" then
-		PickupItem(ID);
-	elseif actionType == "macro" then
-		PickupMacro(ID);
-	elseif actionType == "spell" then
-		PickupSpell(ID);
-  elseif actionType == "equipmentset" then
-		C_EquipmentSet.PickupEquipmentSet(ID);
-	end
-end
-
-function bar:BarAssistRetrieveCursorItem(test)
+function bar:BarAssistRetrieveCursorItem(button)
   --[[
   Function handle then BarAction reciev an action (like a spell) and
   saves it. It's extract all data from what's on cursor
   ]]
 
-  oldButton = test.typeID
-  oldInfoType = test.types
+  oldButton = {
+    ["typeID"] = button.typeID,
+    ["types"] = button.types
+  }
 
   if (GetCursorInfo()) then
-    local infoType, info1, info2 = GetCursorInfo()
-    local nameData, rank, textureData, link, ID
-    local i = test:GetAttribute("index")
+    local infoType, info1, info2 = GetCursorInfo();
 
-    if infoType == "spell" then
-      nameData, rank = GetSpellBookItemName( info1, info2 );
+    local nameData, textureData, link, typeID;
+    local i = button:GetAttribute("index");
+
+    if infoType == "battlepet" then
+      typeID = info1;
+      customName = select(2, C_PetJournal.GetPetInfoByPetID(info1));
+      nameData, textureData = select(8, C_PetJournal.GetPetInfoByPetID(info1));
+    elseif infoType == "equipmentset" then
+      typeID = C_EquipmentSet.GetEquipmentSetID(info1);
+      nameData, textureData, setID = C_EquipmentSet.GetEquipmentSetInfo(typeID);
+    elseif infoType == "item" then
+      nameData, link = GetItemInfo(info1);
+      textureData = select(10, GetItemInfo(info1));
+      local parts = select(3, strsplit("|", link));
+      typeID = select(2, strsplit(":", parts));
+    elseif infoType == "macro" then
+      typeID = info1;
+      nameData, textureData = GetMacroInfo(info1);
+    elseif infoType == "mount" then
+      typeID = info1;
+      nameData, _, textureData = C_MountJournal.GetMountInfoByID(info1);
+    elseif infoType == "spell" then
+      nameData, rank = GetSpellBookItemName(info1, info2);
       textureData = GetSpellTexture(nameData);
       link = GetSpellLink(info1, info2);
-      _, _, parts = strsplit("|", link);
-      _, ID = strsplit(":", parts);
-    elseif infoType == "macro" then
-      nameData, textureData, _ = GetMacroInfo(info1);
-      ID = info1
-    -- elseif infoType == "companion" then
-
-  		--	_, nameData = GetCompanionInfo(info1, info2);
-  	elseif infoType == "item" then
-  			nameData, link, _, _, _, _, _, _, _, textureData = GetItemInfo(info1);
-  			local _, _, parts = strsplit("|", link);
-
-  			_, ID = strsplit(":", parts);
-    elseif infoType == "mount" then
-      creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, hideOnChar, isCollected, mountID = C_MountJournal.GetMountInfoByID(info1)
-      print(spellID)
-      print(mountID)
-     nameData, _, textureData = C_MountJournal.GetMountInfoByID(info1);
-      ID = info1
-  	elseif infoType == "battlepet" then
-        ID = info1
-      _, customName, _, _, _, _, _, nameData, textureData = C_PetJournal.GetPetInfoByPetID(info1)
-    elseif infoType == "equipmentset" then
-      equipmentSetID = C_EquipmentSet.GetEquipmentSetID(info1)
-      nameData, textureData, setID = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetID)
-      ID = equipmentSetID
+      local parts = select(3, strsplit("|", link));
+      typeID = select(2, strsplit(":", parts));
     end
 
-    ClearCursor();
-    -- Sets what the button is a spell and what spell to vast
-    test.Texture = textureData;
-    test.Icon:SetTexture(textureData);
-    test:SetText(nameData);
+    buttonData = {
+      ["buttonName"] = "Button" .. i,
+      ["infoType"] = infoType,
+      ["typeID"] = typeID,
+      ["textureData"] = textureData,
+      ["nameData"] = nameData
+    }
 
-    test.types = infoType;
-    test.typeID = ID;
-
-    -- We don't wan't to set an action cos then we can use spells in edit mode
-    i = test:GetAttribute("index")
-
-    bar.buttons[0][i]['buttonName'] = "Button" .. i;
-    bar.buttons[0][i]['nameData'] = nameData
-    bar.buttons[0][i]['typeID'] = ID;
-    bar.buttons[0][i]['infoType'] = infoType;
-    bar.buttons[0][i]['textureData'] = textureData
-
-    bar:BarAssistPickUpAction2(oldButton, oldInfoType)
+    bar:test(button, buttonData)
+    bar:test2(i, buttonData)
   end
 
+  ClearCursor();
+  bar:BarAssistPickUpAction(oldButton);
   BA_Vars.buttons = bar.buttons
+end
+
+function bar:BarAssistUpdateButtonAction()
+  --[[
+  Sets button action on all buttons, we need to do this everytime button is
+  updated and or created.
+  ]]
+
+  local buttonData, button
+  local ends = bar:countTable()
+
+  -- test if we can use # instead of function
+  for i = 0, ends - 1, 1
+  do
+    button = bar.buttons[0][i]['button']
+
+    if not button then
+      break;
+    end
+
+    buttonData = bar.buttons[0][i]
+    button:SetScript("PreClick", nil)
+
+    if buttonData['infoType'] == "battlepet" then
+      button:SetScript("PreClick", function(self)
+        C_PetJournal.SummonPetByGUID(tostring(self['typeID']))
+      end);
+    elseif buttonData['infoType'] == "equipmentset" then
+      button:SetScript("PreClick", function(self)
+        C_EquipmentSet.UseEquipmentSet(self['typeID'])
+      end);
+    elseif buttonData['infoType'] == "item" then
+      button:SetAttribute("type", buttonData['infoType']);
+      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
+    elseif buttonData['infoType'] == "macro" then
+      button:SetAttribute("type", buttonData['infoType']);
+      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
+    elseif buttonData['infoType'] == "mount" then
+      button:SetScript("PreClick", function(self)
+        C_MountJournal.SummonByID(self['typeID'])
+      end);
+    elseif buttonData['infoType'] == "spell" then
+      button:SetAttribute("type", buttonData['infoType']);
+      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
+    end
+
+    bar.buttons[0][i] = buttonData
+  end
 end
 
 -- We need to count how many buttons we got, Lua sucks
 function bar:countTable()
   count = 0
-  for k,v in pairs(bar.buttons[0]) do
+  for k, v in pairs(bar.buttons[0]) do
     count = count + 1
   end
 
@@ -182,26 +185,41 @@ end
 
 function bar:restoreSaved()
   ends = bar:countTable()
-  for i=0, ends-1, 1
+  for i = 0, ends - 1, 1
   do
-    if bar.buttons[0][i]['infoType'] then
-    buttonData = bar.buttons[0][i]
-    button = buttonData['button']
-    button.types = buttonData['infoType'];
-    button.typeID = buttonData['typeID'];
-    button.Texture = buttonData['textureData']
-    button.Icon:SetTexture(buttonData['textureData'])
-    button:SetText(buttonData['nameData'])
-  else
-    button = bar.buttons[0][i]['button']
-    if button then
-    button.types = ""
-    button.typeID = ""
-    button.Texture = ""
-    button.Icon:SetTexture("")
-    button:SetText("")
+    button = bar.buttons[0][i]
+
+    if button['infoType'] then
+      buttonData = button
+    else
+      buttonData = {
+        ["buttonName"] = "",
+        ["infoType"] = "",
+        ["typeID"] = "",
+        ["textureData"] = "",
+        ["nameData"] = ""
+      }
+    end
+
+    bar:test(button['button'], buttonData)
   end
-  end
-  end
-  bar:createButtonsNew()
+
+  bar:BarAssistUpdateButtonAction()
+end
+
+function bar:test(self, buttonData)
+  self.types = buttonData['infoType'];
+  self.typeID = buttonData['typeID'];
+  self.Texture = buttonData['textureData']
+  self.Icon:SetTexture(buttonData['textureData'])
+  self:SetText(buttonData['nameData'])
+  self:SetAttribute(buttonData['infoType'])
+end
+
+function bar:test2(index, buttonData)
+  bar.buttons[0][index]['buttonName'] = buttonData['buttonName'];
+  bar.buttons[0][index]['nameData'] = buttonData['nameData'];
+  bar.buttons[0][index]['typeID'] = buttonData['typeID'];
+  bar.buttons[0][index]['infoType'] = buttonData['infoType'];
+  bar.buttons[0][index]['textureData'] = buttonData['textureData'];
 end

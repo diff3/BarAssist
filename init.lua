@@ -2,7 +2,7 @@ local name, bar = ...
 
 function bar:init_vars()
   --[[
-  This function is called on ADDON_LOADED
+  This function is called by ADDON_LOADED
   ]]
 
   bar.buttons = nil

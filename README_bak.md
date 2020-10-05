@@ -22,6 +22,6 @@ Mål
 
 
 TODO:
-- Tror jag måste skapa separata tables för knapp informationen som sparas mellan sessionerna, och knapp objektet. Frames kan nämligen inte förstöras i WoW api. Det kan bli en minnes slukare annars.
+- Kolla om det är någon vinst att spara i two tabbeler.
 
 - fixa så att den kan öppnas och stängas med en knapp tryckning. Jag behöver i vilket fall fixa detta även om jag använder en icon för att öppna.

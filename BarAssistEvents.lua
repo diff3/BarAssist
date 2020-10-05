@@ -18,13 +18,13 @@ function bar:ADDON_LOADED(self, event)
       print("BarAssist loaded");
 
       -- It's not until now all between session variables is loaded, if we
-      -- run init or create all before this point we will reciev an error
+      -- run init or create all before this point the program breakes.
       bar:init_vars()
       bar:createAll()
     end
 end
 
--- test to show an cooldown animation on buttons
+-- test to show an cooldown animation on buttons, not used at the moment
 function bar:UNIT_SPELLCAST_SUCCEEDED(self, arg1, arg2, arg3)
   name, rank, spellid, castTime, minRange, maxRange, spellId = GetSpellInfo(arg3)
   if arg1 == "player" then
