@@ -10,15 +10,9 @@ function bar:init_vars()
   if not BA_Vars.buttons then
     BA_Vars.buttons = {
       ['move'] = false,
-      ['headerText'] = "PopUp menu",
+      ['headerText'] = "Menu",
       [0] = {
-        [0] = {
-          ['buttonName'] = "Button1",
-          ['nameData'] = "Ghost Wolf",
-          ['typeID'] = "2645",
-          ['infoType'] = "spell",
-          ['textureData'] = GetSpellTexture("Ghost Wolf")
-        },
+        [0] = {},
         [1] = {},
         [2] = {},
       }

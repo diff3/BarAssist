@@ -1,6 +1,6 @@
 <Bindings>
   <!-- Just som test with bindings -->
-	<Binding name="ghostOpenHide" runOnUp="true" header="BARASSIST">
+	<Binding name="BarAssistShowFrame" runOnUp="true" header="BARASSIST">
 		BarAssistShowFrame();
 	</Binding>
 	<Binding name="BarAssistButton1" runonUp="true">

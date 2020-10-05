@@ -12,18 +12,13 @@ function bar:createButton(buttonName, relativeTo, index)
 
   button.Icon = button:CreateTexture(buttonName, "OVERLAY");
   button.Icon:SetSize(16, 16);
-  button.Icon:SetPoint("TOPLEFT", button
-  , "TOPLEFT", 2, - 2);
+  button.Icon:SetPoint("TOPLEFT", button, "TOPLEFT", 2, - 2);
 
   -- If true, and the SELFCAST modifier is held down, resolves the unit to "player".
   button:SetAttribute("checkselfcast", "1");
 
   -- If true, and the FOCUSCAST modifier is held down, resolves the unit to "focus".
   button:SetAttribute("checkfocuscast", "1");
-
-  -- MenuItem.myCooldown = CreateFrame("Cooldown", "myCooldown", MenuItem, "CooldownFrameTemplate")
-  -- MenuItem.myCooldown:SetAllPoints()
-
   button:RegisterForDrag("LeftButton");
   return button
 end
@@ -39,11 +34,12 @@ function bar:BarAssistPickUpAction(button)
   actionSubType = ""
 
   if actionType == "mount" then
-		C_MountJournal.Pickup(ID);
+    local index = bar:getFuckingMounth(ID)
+		C_MountJournal.Pickup(index);
 	elseif actionType == "battlepet" then
 		C_PetJournal.PickupPet(ID)
 	elseif actionType == "equipmentset" then
-		PickupEquipmentSetByName(ID);
+		C_EquipmentSet.PickupEquipmentSet(ID);
 	elseif actionType == "item" then
 		PickupItem(actionSubType);
 	elseif actionType == "macro" then
@@ -61,63 +57,62 @@ function bar:BarAssistPickUpAction(button)
   button:SetAttribute("type", nil);
   button = nil
 
-  print(button)
-
-  --i = button:GetAttribute(index)
   bar.buttons[0][i]['buttonName'] = "Button" .. i;
   bar.buttons[0][i]['nameData'] = nameData
   bar.buttons[0][i]['typeID'] = ID;
   bar.buttons[0][i]['infoType'] = infoType;
   bar.buttons[0][i]['textureData'] = textureData
+end
 
-  -- does not empty any button at the moment
+function bar:getFuckingMounth(ID)
+  ant = C_MountJournal.GetNumDisplayedMounts()
+
+  for index=1, ant, 1
+  do
+    _,_,_,_,_,_,_,_,_,_,_,mountID = C_MountJournal.GetDisplayedMountInfo(index)
+
+    if mountID == ID then
+      return index
+    end
+
+  end
 
 end
 
-function bar:BarAssistPickUpAction2(ID)
+function bar:BarAssistPickUpAction2(ID, actionType)
   --[[
   Function for to pickup all types of actions from BarAssist window
-
-  This is just a test to change icons. If you got an icon on pointer and one
-  at the menu
-
   ]]--
 
   if actionType == "mount" then
-		C_MountJournal.Pickup(ID);
+    local index = bar:getFuckingMounth(ID)
+    C_MountJournal.Pickup(index);
 	elseif actionType == "battlepet" then
 		C_PetJournal.PickupPet(ID)
-	elseif actionType == "equipmentset" then
-		PickupEquipmentSetByName(ID);
 	elseif actionType == "item" then
-		PickupItem(actionSubType);
+		PickupItem(ID);
 	elseif actionType == "macro" then
 		PickupMacro(ID);
 	elseif actionType == "spell" then
 		PickupSpell(ID);
+  elseif actionType == "equipmentset" then
+		C_EquipmentSet.PickupEquipmentSet(ID);
 	end
-end
-
-function bar:checkActionBar(button)
-  return button.typeID
 end
 
 function bar:BarAssistRetrieveCursorItem(test)
   --[[
   Function handle then BarAction reciev an action (like a spell) and
   saves it. It's extract all data from what's on cursor
-
-  at the moment it's just working for spells and macros.
   ]]
 
-  oldButton = bar:checkActionBar(test)
+  oldButton = test.typeID
+  oldInfoType = test.types
 
   if (GetCursorInfo()) then
     local infoType, info1, info2 = GetCursorInfo()
     local nameData, rank, textureData, link, ID
-
-    nameData = infoType
-    ID = info1
+    local i = test:GetAttribute("index")
 
     if infoType == "spell" then
       nameData, rank = GetSpellBookItemName( info1, info2 );
@@ -128,33 +123,27 @@ function bar:BarAssistRetrieveCursorItem(test)
     elseif infoType == "macro" then
       nameData, textureData, _ = GetMacroInfo(info1);
       ID = info1
-    elseif cursorType == "companion" then
-  			_, nameData = GetCompanionInfo(info1, info2);
-  	elseif cursorType == "item" then
-  			_, link, _, _, _, _, _, _, _, itemTexture, _ = GetItemInfo(cursorData);
+    -- elseif infoType == "companion" then
+
+  		--	_, nameData = GetCompanionInfo(info1, info2);
+  	elseif infoType == "item" then
+  			nameData, link, _, _, _, _, _, _, _, textureData = GetItemInfo(info1);
   			local _, _, parts = strsplit("|", link);
+
   			_, ID = strsplit(":", parts);
-    elseif cursorType == "mount" then
-      --local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, hideOnChar, isCollected;
-      --creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, hideOnChar, isCollected, mountID = C_MountJournal.GetMountInfoByID(cursorData);
-      --DEFAULT_CHAT_FRAME:AddMessage(creatureName);
-
-    --local link = GetSpellLink(cursorData, cursorSubType);
-   --	local _, _, parts = strsplit("|", link);
-    --	_, itemID = strsplit(":", parts);
-      -- cursorData =;
-
-  	elseif cursorType == "battlepet" then
-      -- local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(cursorData)
-
-		-- speciesId, petGUID = C_PetJournal.FindPetIDByName(name)
-		--	DEFAULT_CHAT_FRAME:AddMessage("creatureID" .. creatureID )
-		--	DEFAULT_CHAT_FRAME:AddMessage("name: " .. name);
-
-		--	DEFAULT_CHAT_FRAME:AddMessage("speciesId: " .. speciesId);
-		--	DEFAULT_CHAT_FRAME:AddMessage(C_PetJournal.GetPetSummonInfo(petGUID));
-		--	DEFAULT_CHAT_FRAME:AddMessage(C_PetJournal.SummonPetByGUID(petGUID));
-		--	DEFAULT_CHAT_FRAME:AddMessage("petGUID: " .. petGUID);
+    elseif infoType == "mount" then
+      creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, hideOnChar, isCollected, mountID = C_MountJournal.GetMountInfoByID(info1)
+      print(spellID)
+      print(mountID)
+     nameData, _, textureData = C_MountJournal.GetMountInfoByID(info1);
+      ID = info1
+  	elseif infoType == "battlepet" then
+        ID = info1
+      _, customName, _, _, _, _, _, nameData, textureData = C_PetJournal.GetPetInfoByPetID(info1)
+    elseif infoType == "equipmentset" then
+      equipmentSetID = C_EquipmentSet.GetEquipmentSetID(info1)
+      nameData, textureData, setID = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetID)
+      ID = equipmentSetID
     end
 
     ClearCursor();
@@ -167,8 +156,6 @@ function bar:BarAssistRetrieveCursorItem(test)
     test.typeID = ID;
 
     -- We don't wan't to set an action cos then we can use spells in edit mode
-    -- test:SetAttribute("type", infoType);
-    -- test:SetAttribute(infoType, nameData);
     i = test:GetAttribute("index")
 
     bar.buttons[0][i]['buttonName'] = "Button" .. i;
@@ -177,7 +164,7 @@ function bar:BarAssistRetrieveCursorItem(test)
     bar.buttons[0][i]['infoType'] = infoType;
     bar.buttons[0][i]['textureData'] = textureData
 
-    bar:BarAssistPickUpAction2(oldButton)
+    bar:BarAssistPickUpAction2(oldButton, oldInfoType)
   end
 
   BA_Vars.buttons = bar.buttons
@@ -200,13 +187,21 @@ function bar:restoreSaved()
     if bar.buttons[0][i]['infoType'] then
     buttonData = bar.buttons[0][i]
     button = buttonData['button']
-    button:SetAttribute("type", buttonData['infoType']);
-    button:SetAttribute(buttonData['infoType'], buttonData['typeID']);
     button.types = buttonData['infoType'];
     button.typeID = buttonData['typeID'];
     button.Texture = buttonData['textureData']
     button.Icon:SetTexture(buttonData['textureData'])
     button:SetText(buttonData['nameData'])
+  else
+    button = bar.buttons[0][i]['button']
+    if button then
+    button.types = ""
+    button.typeID = ""
+    button.Texture = ""
+    button.Icon:SetTexture("")
+    button:SetText("")
   end
   end
+  end
+  bar:createButtonsNew()
 end

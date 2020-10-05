@@ -10,14 +10,49 @@ function retrievCursorItem(self, event, ...)
 end
 
 function startMov(self, event, ...)
-    self:StartMoving();
+  self:StartMoving();
 end
 
 function stopMov(self, event, ...)
-    self:StopMovingOrSizing();
+  self:StopMovingOrSizing();
 end
+function bar:createButtonsNew()
+  local buttonData, button
+  ends = bar:countTable()
+  for i = 0, ends - 1, 1
+  do
+    button = bar.buttons[0][i]['button']
+    if not button then
+      break;
+    end
+    buttonData = bar.buttons[0][i]
+    button:SetScript("PreClick", nil)
 
-local name, bar = ...
+    if buttonData['infoType'] == "spell" then
+      button:SetAttribute("type", buttonData['infoType']);
+      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
+    elseif buttonData['infoType'] == "macro" then
+      button:SetAttribute("type", buttonData['infoType']);
+      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
+    elseif buttonData['infoType'] == "item" then
+      button:SetAttribute("type", buttonData['infoType']);
+      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
+    elseif buttonData['infoType'] == "mount" then
+      button:SetScript("PreClick", function(self)
+        C_MountJournal.SummonByID(self['typeID'])
+      end);
+    elseif buttonData['infoType'] == "battlepet" then
+      button:SetScript("PreClick", function(self)
+        C_PetJournal.SummonPetByGUID(tostring(self['typeID']))
+      end);
+    elseif buttonData['infoType'] == "equipmentset" then
+      button:SetScript("PreClick", function(self)
+        C_EquipmentSet.UseEquipmentSet(self['typeID'])
+      end);
+    end
+    bar.buttons[0][i] = buttonData
+  end
+end
 
 -- Create a popup menu to enter text
 StaticPopupDialogs["EDIT_MENU_TITLE_DIALOG"] = {
@@ -31,7 +66,7 @@ StaticPopupDialogs["EDIT_MENU_TITLE_DIALOG"] = {
     self.editBox:SetText(header:GetText())
   end,
   OnAccept = function (self, data, data2)
-    local text = self.editBox:GetText()
+      local text = self.editBox:GetText()
     header:SetText(text)
     bar.buttons['headerText'] = text
   end,
@@ -47,28 +82,31 @@ function editeModeActivation()
 
   if editVarning:IsVisible() then
     editVarning:Hide();
-      ends = bar:countTable()
-    for i=0, ends -1, 1
+    ends = bar:countTable()
+    for i = 0, ends - 1, 1
     do
       if bar.buttons[0][i]['infoType'] then
-      buttonData = bar.buttons[0][i]
-      button =  bar.buttons[0][i]['button']
-      button:SetAttribute("type", buttonData['infoType']);
-      button:SetAttribute(buttonData['infoType'], buttonData['nameData']);
-      button:SetScript("PreClick", nil);
-      button:SetScript("OnDragStart", nil);
-      button:SetScript("OnReceiveDrag", nil);
-      bar.buttons[0][i]['button'] = button
+        buttonData = bar.buttons[0][i]
+        button = bar.buttons[0][i]['button']
+        button:SetScript("PreClick", nil);
+        button:SetScript("OnDragStart", nil);
+        button:SetScript("OnReceiveDrag", nil);
+        bar.buttons[0][i]['button'] = button
+      end
     end
-    end
+    bar:createButtonsNew()
+
   else
     -- This function turn on the edit mode, and reactivate all buttons
     editVarning:Show();
     ends = bar:countTable()
-    for i=0, ends -1, 1
+    for i = 0, ends - 1, 1
     do
       buttonData = bar.buttons[0][i]
-      button =  bar.buttons[0][i]['button']
+      button = bar.buttons[0][i]['button']
+      -- if not button then
+      --  break;
+      -- end
 
       if button:GetAttribute("type") then
         button:SetAttribute(buttonData['infoType'], nil);
@@ -95,13 +133,13 @@ function bar:createAll()
 
   -- template text (title)
   header = CreateFrame("Button", "TitleButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
-  header:SetPoint("TOP", bar.Menu, "TOP", 0, -5);
+  header:SetPoint("TOP", bar.Menu, "TOP", 0, - 5);
   header:SetText(bar.buttons['headerText'])
   header:SetScript("OnClick", popUpDialog);
 
   -- Config
   configButton = CreateFrame("Button", "ConfigButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
-  configButton:SetPoint("BOTTOM", bar.Menu, "BOTTOMRIGHT", -25, 5);
+  configButton:SetPoint("BOTTOM", bar.Menu, "BOTTOMRIGHT", - 25, 5);
   configButton:SetText("Config")
   configButton:SetScript("OnClick", editeModeActivation);
 
@@ -118,13 +156,13 @@ function bar:createAll()
 
   -- Where to display
   bar.Menu:SetPoint("CENTER");
-  bar.buttons[0][0]['button']:SetPoint("TOPLEFT", bar.Menu, "TOPLEFT", 14, -25);
-  bar.buttons[0][1]['button']:SetPoint("TOP", bar.buttons[0][0]['button'], "BOTTOM", 0, -4)
-  bar.buttons[0][2]['button']:SetPoint("TOP", bar.buttons[0][1]['button'], "BOTTOM", 0, -4)
+  bar.buttons[0][0]['button']:SetPoint("TOPLEFT", bar.Menu, "TOPLEFT", 14, - 25);
+  bar.buttons[0][1]['button']:SetPoint("TOP", bar.buttons[0][0]['button'], "BOTTOM", 0, - 4)
+  bar.buttons[0][2]['button']:SetPoint("TOP", bar.buttons[0][1]['button'], "BOTTOM", 0, - 4)
 
   -- Sets what the button is a spell and what spell to vast
   if BA_Vars then
-      bar:restoreSaved()
+    bar:restoreSaved()
   end
 
   bar.Menu:Show();
