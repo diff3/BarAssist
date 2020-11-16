@@ -73,3 +73,37 @@ https://github.com/diff3/Ghost
 
 --BINDING_HEADER_BARASSISTHEADER = name
 --_G["BINDING_NAME_CLICK BarAssistHeader:LeftButton"] = localKeybind["FRAMEBINDSET"]
+
+
+
+
+
+Bara göra ett begränsant antal knappar.
+
+
+
+Buttons:
+
+button:SetAttribute - only button ID
+textureData
+nameData
+
+Vars
+
+ID - spellid, itemid etc.
+buttonID
+infotype - battlepet, equipmentset, item, macro, mount
+<id> = true för att söka
+realID
+bookID
+
+
+
+
+bar.buttons[0][index]['buttonName'] = buttonData['buttonName'];
+bar.buttons[0][index]['nameData'] = buttonData['nameData'];
+bar.buttons[0][index]['typeID'] = buttonData['typeID'];
+bar.buttons[0][index]['infoType'] = buttonData['infoType'];
+bar.buttons[0][index]['textureData'] = buttonData['textureData'];
+bar.buttons[0][index]['spellId'] = buttonData['spellId'];
+end

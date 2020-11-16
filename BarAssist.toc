@@ -1,17 +1,18 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: BarAssist
 ## Author: Entropy
 ## Notes: PopUp meny
-## Version: 0.3
+## Version: 0.8
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 ## SavedVariablesPerCharacter: BA_Vars
 
-init.lua
 localizations.lua
+BarAssistButtonLayout.lua
+init.lua
 BarAssist.xml
-BarAssistEvents.lua
-BarAssistSlashes.lua
 BarAssist.lua
+BarAssistSlashes.lua
 BarAssistActionButtons.lua
 BarAssistBindings.lua
+BarAssistOptionsFrame.lua

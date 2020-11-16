@@ -1,31 +1,109 @@
 -- simple way to share information between files in lua.
 local name, bar = ...
 
-function pickUpAction(self, event, ...)
-  local button = bar:BarAssistPickUpAction(self)
-  local index = button:GetAttribute("index")
-  local buttonData = {
-    ["buttonName"] = "",
-    ["infoType"] = "",
-    ["typeID"] = "",
-    ["textureData"] = "",
-    ["nameData"] = ""
-  }
+-- Events
+bar.eventFrame = CreateFrame("Frame", "eventFrame")
+bar.eventFrame:RegisterEvent("ADDON_LOADED")
+bar.eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+bar.eventFrame:RegisterEvent("UPDATE_BINDINGS")
 
-  bar:test(button, buttonData)
-  bar:test2(index, buttonData)
+-- this function let us create funtions of all the events, looks nicer.
+bar.eventFrame:SetScript("OnEvent",
+    function(self, event, ...)
+        if (type(bar[event]) == 'function') then
+            bar[event](self, event, ...);
+        end
+    end
+)
+
+function bar:ADDON_LOADED(self, event)
+    if event == "BarAssist" then
+      print("BarAssist loaded");
+      bar.buttons = {}
+
+      -- It's not until now all between session variables is loaded, if we
+      -- run init or create all before this point the program breakes.
+      bar:init_vars()
+
+      -- I could have done one function to create all, but I felt I needed to
+      -- have the ability to call functions seperatly. Like then key binding
+      -- updates.
+
+      bar:createTemplateFrame()
+
+
+      local btn
+
+      for index=0, 2, 1 do
+        btn = bar:createOneButton(index)
+        bar.buttons[index] = btn
+        bar:restoreSavedButtons(btn)
+        bar:UpdateCooldown(btn)
+        bar:UpdateButtonActions(btn)
+      end
+
+      header:SetText(BA_Vars.headerText)
+      bar.Menu:Show();
+    end
 end
 
-function retrievCursorItem(self, event, ...)
-  bar:BarAssistRetrieveCursorItem(self)
+function bar:UPDATE_BINDINGS(self, event, ...)
+  for index=0, 2, 1 do
+    local nameData = "BarAssistButton" .. index
+    local key1, key2 = GetBindingKey(nameData .. "binding")
+    local spellName = GetSpellInfo(getglobal(nameData).typeID)
+
+    if key1 and spellName then
+      SetBindingSpell(key1, spellName)
+    end
+
+    if key2 and spellName then
+      SetBindingSpell(key2, spellName)
+    end
+  end
 end
 
-function startMov(self, event, ...)
-  self:StartMoving();
+function bar:UNIT_SPELLCAST_SUCCEEDED(self, arg1, arg2, arg3, arg4)
+  if arg1 == "player" then
+    C_Timer.After(0.2, function()
+      -- we need to wait 0.2 secounds or we won't get any information from GetSpellCooldown
+
+      for i = 0, 2, 1 do
+        local btn = getglobal("BarAssistButton" .. i)
+        local duration = 0
+        local startTime = 0
+
+        if btn.infoType == 'item' then
+          local spellName, spellID = GetItemSpell(btn.typeID)
+          if tostring(spellID) == tostring(arg3) then
+            startTime, duration = GetItemCooldown(btn.typeID)
+          end
+        elseif btn.infoType == 'spell' then
+          if tostring(btn.typeID) == tostring(arg3) then
+            start, duration = GetSpellCooldown(arg3)
+          end
+        end
+
+        if duration > 0 then
+          btn.cooldown:SetCooldown(start, duration)
+        end
+      end
+    end)
+  end
 end
 
-function stopMov(self, event, ...)
-  self:StopMovingOrSizing();
+function bar:UpdateCooldown(btn)
+  local start, duration = 0, 0
+
+  if btn.infoType == 'item' then
+    start, duration = GetItemCooldown(btn.typeID)
+  elseif btn.infoType == 'spell' then
+    start, duration = GetSpellCooldown(btn.typeID)
+  end
+
+  if duration > 0 then
+    btn.cooldown:SetCooldown(start, duration)
+  end
 end
 
 -- Create a popup menu to enter text
@@ -42,69 +120,82 @@ StaticPopupDialogs["EDIT_MENU_TITLE_DIALOG"] = {
   OnAccept = function (self, data, data2)
     local text = self.editBox:GetText()
     header:SetText(text)
-    bar.buttons['headerText'] = text
+    BA_Vars.headerText = text
   end,
   hasEditBox = true
 }
 
-function BarAssistPopUpDialog()
-  StaticPopup_Show("EDIT_MENU_TITLE_DIALOG");
-end
-
 function editeModeActivation()
-  -- This function turn off the edit mode, and reactivate all buttons
-  -- this should be rewritten
-  local ends = bar:countTable()
-
   if editVarning:IsVisible() then
-    editVarning:Hide();
-    for i = 0, ends - 1, 1
-    do
-      if bar.buttons[0][i]['infoType'] then
-        buttonData = bar.buttons[0][i]
-        button = bar.buttons[0][i]['button']
-        button:SetScript("PreClick", nil);
-        button:SetScript("OnDragStart", nil);
-        button:SetScript("OnReceiveDrag", nil);
-        bar.buttons[0][i]['button'] = button
-      end
-    end
-    bar:BarAssistUpdateButtonAction()
-  else
-    -- This function turn on the edit mode, and reactivate all buttons
-    editVarning:Show();
-    for i = 0, ends - 1, 1
-    do
-      buttonData = bar.buttons[0][i]
-      button = bar.buttons[0][i]['button']
-      if button:GetAttribute("type") then
-        button:SetAttribute(buttonData['infoType'], nil);
-        button:SetAttribute("type", nil);
-      end
+    editVarning:Hide()
+    bar.editMode = false
 
-      button:SetScript("PreClick", retrievCursorItem);
-      button:SetScript("OnDragStart", pickUpAction);
-      button:SetScript("OnReceiveDrag", retrievCursorItem);
-      bar.buttons[0][i]['button'] = button
+    local btn
+    for i=0, 2, 1 do
+      btn = getglobal("BarAssistButton" .. i)
+      bar:UpdateButtonActions(btn)
+    end
+  else
+    editVarning:Show();
+    bar.editMode = true
+    local btn
+
+    for i=0, 2, 1 do
+      btn = getglobal("BarAssistButton" .. i)
+      btn:SetAttribute(btn.infoType, "");
+      btn:SetAttribute("type", "");
     end
   end
 end
 
-function bar:createAll()
-  -- Create a Base frame and a button
-  bar.Menu = CreateFrame("Frame", "BA_Menu", UIParent, "SecureHandlerBaseTemplate, BA_MenuContainer");
+function bar:createTemplateFrame()
+  --[[
+  Creates where we till place all buttons.
+  ]]
+
+  -- Create a Base frame
+  bar.Menu = CreateFrame("Frame", "BA_Menu", UIParent, "SecureHandlerClickTemplate, SecureHandlerBaseTemplate, BA_MenuContainer");
   bar.Menu:SetMovable(true)
   bar.Menu:EnableMouse(true)
   bar.Menu:RegisterForDrag("LeftButton");
-  bar.Menu:SetScript("OnDragStart", startMov);
-  bar.Menu:SetScript("OnReceiveDrag", stopMov);
+  -- bar.Menu:RegisterForClicks("AnyDown")
   bar.Menu:SetBackdropColor(0, 0, 0, 0.9);
+  bar.Menu:SetPoint("CENTER");
 
-  -- template text (title)
+
+  -- if (keystate == "down") then
+  --   if getglobal("BA_Menu"):IsVisible() then
+  --     getglobal("BA_Menu"):Hide();ß
+  --   else
+  --     getglobal("BA_Menu"):Show();
+  --   end
+  -- end
+
+  -- bar.Menu:SetAttribute("_onclick", [[
+  --   self:SetPoint("CENTER", "$cursor")
+  --
+  --   if self:IsVisible() then
+  --     self:Hide()
+  --   else
+  --     self:Show()
+  --   end]]
+  -- )
+
+
+  bar.Menu:SetScript("OnDragStart", function(self, event, ...)
+    if bar.editMode == true then
+      self:StartMoving()
+    end
+  end);
+  bar.Menu:SetScript("OnReceiveDrag", function(self, event, ...) self:StopMovingOrSizing() end);
+
+  -- template
   header = CreateFrame("Button", "TitleButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
   header:SetPoint("TOP", bar.Menu, "TOP", 0, - 5);
-  header:SetText(bar.buttons['headerText'])
-  header:SetScript("OnClick", BarAssistPopUpDialog);
+  header:SetText(bar.headerText)
+  header:SetScript("OnClick", function(self, event, ...)
+    StaticPopup_Show("EDIT_MENU_TITLE_DIALOG")
+  end)
 
   -- Config
   configButton = CreateFrame("Button", "ConfigButton", bar.Menu, "SecureActionButtonTemplate, SecureHandlerBaseTemplate, BA_MenuLabelTemplate");
@@ -117,22 +208,80 @@ function bar:createAll()
   editVarning:SetPoint("BOTTOM", bar.Menu, "BOTTOMLEFT", 40, 5);
   editVarning:SetText("EDIT MODE")
   editVarning:Hide();
+end
 
-  -- create 3 buttons
-  bar.buttons[0][0]['button'] = bar:createButton("BarAssistButton1", bar.Menu, 0)
-  bar.buttons[0][1]['button'] = bar:createButton("Button2", bar.buttons[0][0]['button'], 1)
-  bar.buttons[0][2]['button'] = bar:createButton("Button3", bar.buttons[0][1]['button'], 2)
+function bar:createOneButton(index)
+  --[[
+  Method to create ONE button
+  ]]
 
-  -- Where to display
-  bar.Menu:SetPoint("CENTER");
-  bar.buttons[0][0]['button']:SetPoint("TOPLEFT", bar.Menu, "TOPLEFT", 14, - 25);
-  bar.buttons[0][1]['button']:SetPoint("TOP", bar.buttons[0][0]['button'], "BOTTOM", 0, - 4)
-  bar.buttons[0][2]['button']:SetPoint("TOP", bar.buttons[0][1]['button'], "BOTTOM", 0, - 4)
+  -- populate it with buttons
+  local data, setPoint, icon;
 
-  -- Sets what the button is a spell and what spell to vast
-  if BA_Vars then
-    bar:restoreSaved()
-  end
+  data = bar.buttonLayout[index]
+  setPoint = data['setPoint']
 
-  bar.Menu:Show();
+  -- Creates button frame
+  local button = CreateFrame(data['frameType'], data['name'], getglobal(data['relativeTo']), data['template'], data['id']);
+  button:SetPoint(setPoint['point'], getglobal(data['relativeTo']), setPoint['relativePoint'], setPoint['ofsx'], setPoint['ofsy']);
+
+  -- Icon texture layer
+  icon =  data['icon']
+  setPoint = icon['setPoint']
+
+  button.Icon = button:CreateTexture(data['name'] .. "_icon", icon['layer']);
+  button.Icon:SetSize(icon['sizex'], icon['sizey']);
+  button.Icon:SetPoint(setPoint['point'], button, setPoint['relativePoint'], setPoint['ofsx'], setPoint['ofsy']);
+
+  -- Cooldown layer
+  local cooldown = CreateFrame("Cooldown", data['name'] .. index .. "_cooldown", button, "CooldownFrameTemplate")
+  cooldown:SetAllPoints()
+  button.cooldown = cooldown
+
+  -- Attributes
+  button:SetAttribute("index", index)
+  button:SetAttribute("checkselfcast", 1);
+  button:SetAttribute("checkfocuscast", 1);
+  button:RegisterForDrag("LeftButton");
+
+  -- Scripts
+  button:SetScript("OnEnter", function (self) bar:OnEnterShowGameTooltip(self) end);
+  button:SetScript("OnLeave", function (self) GameTooltip:Hide() end);
+
+  -- All buttons also got a OnClick for all actions
+
+  button:SetScript("PreClick", function(self, event, ...)
+    if bar.editMode == true then
+      bar:BarAssistRetrieveCursorItem(self)
+     end
+  end);
+
+  button:SetScript("OnReceiveDrag", function(self, event, ...)
+    if bar.editMode == true then
+      bar:BarAssistRetrieveCursorItem(self)
+    end
+  end);
+
+  button:SetScript("OnDragStart", function(self, event, ...)
+    if bar.editMode == true then
+      bar:BarAssistPickUpAction(self)
+
+      self:SetAttribute(self.infoType,"");
+      self:SetAttribute("type", "");
+
+      local i = self:GetAttribute("index")
+      self.infoType = ""
+      self.typeID = ""
+      self.Texture = ""
+      self.Icon:SetTexture("")
+      self:SetText("")
+
+      BA_Vars.buttons[i]['infoType'] = ""
+      BA_Vars.buttons[i]['typeID'] = ""
+      BA_Vars.buttons[i]['Texture'] = ""
+      BA_Vars.buttons[i]['nameData'] = ""
+    end
+  end);
+
+  return button
 end

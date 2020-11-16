@@ -23,11 +23,24 @@ Mål
 
 TODO:
 - Kolla om det är någon vinst att spara i two tabbeler.
-
-- fixa så att den kan öppnas och stängas med en knapp tryckning. Jag behöver i vilket fall fixa detta även om jag använder en icon för att öppna.
-
-- bindings
-
-- grafik på nedredelen i form av en pi
-
+- fix open/close to work in protected mode
+- grafik på nedredelen i form av en pil
 - skapa ett sätt att lägga en "ikon" på actionbaren
+
+
+när jag skapar en knapp måste jag ha följande med (det som finns i bar:createButton()
+
+Jag måste också göra en ändring hur saker och ting sparas.
+  - menyn blir inte dynamisk, utan den får bli statiskt
+  - med min template fil kan jag skapa olika saker med den
+  - save data måste byggas om
+  - hur jag skapar knapparna måste byggas om.
+  - mer utförlig kommentering
+  - VAR skall datan komma från som används? från knappen eller från savefil.
+    - ganska säker på att dagassist kör allt från knappen. Men den renderar även en meny
+
+
+
+
+- text above button
+- setbinding text not working, but binding does

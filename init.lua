@@ -3,21 +3,25 @@ local name, bar = ...
 function bar:init_vars()
   --[[
   This function is called by ADDON_LOADED
-  ]]
+  ]]--
 
-  bar.buttons = nil
+  bar.editMode = false
+
+  if not BA_Vars then
+    BA_Vars = {}
+  end
+
+  if not BA_Vars.headerText then
+    BA_Vars.headerText = "Menu"
+  end
 
   if not BA_Vars.buttons then
     BA_Vars.buttons = {
-      ['move'] = false,
-      ['headerText'] = "Menu",
-      [0] = {
-        [0] = {},
-        [1] = {},
-        [2] = {},
-      }
+      [0] = {},
+      [1] = {},
+      [2] = {},
     }
   end
 
-  bar.buttons = BA_Vars.buttons
+  bar.headerText = BA_Vars.headerText
 end

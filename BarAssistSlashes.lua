@@ -28,6 +28,9 @@ function bar.SlashHandler(msg, editbox)
     elseif msg == 'macro' then
       -- ShowMacroFrame()
       _G['MacroPopupFrame']:Show();
+    elseif msg == 'type' then
+      print(bar.buttons[0]:GetAttribute("type"))
+      print(bar.buttons[0]:GetAttribute("spell"))      
     else
         print(name .. ": Usages /ba help");
     end

@@ -2,19 +2,20 @@
 ..\FrameXML\UI.xsd">
 
   <!-- main template for popup-->
-	<Frame name="BA_MenuContainer" toplevel="true" frameStrata="HIGH" virtual="true">
+	<Frame name="BA_MenuContainer" inherits="BackdropTemplate" toplevel="true" frameStrata="HIGH" virtual="true">
 		<Size><AbsDimension x="220" y="128"/></Size>
-		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-			<EdgeSize><AbsValue val="16"/></EdgeSize>
-			<TileSize><AbsValue val="16"/></TileSize>
-			<BackgroundInsets><AbsInset left="5" right="5" top="5" bottom="5"/></BackgroundInsets>
-		</Backdrop>
+
+    <KeyValues>
+      <KeyValue key="backdropInfo" value="BACKDROP_TOOLTIP_16_16_5555" type="global"/>
+      <KeyValue key="backdropBorderColor" value="LEGENDARY_ORANGE_COLOR" type="global"/>
+      <KeyValue key="backdropBorderColorAlpha" value="0.25" type="number"/>
+    </KeyValues>
 	</Frame>
 
   <!-- How big the button will be, we have icon and text in this template -->
 	<Button name="BA_MenuButtonTemplate" virtual="true">
 		<Size>
-			<AbsDimension x="200" y="18"/>
+			<AbsDimension x="18" y="18"/>
 		</Size>
 		<ButtonText name="$parentText" justifyH="LEFT" justifyV="MIDDLE" >
 			<Anchors>
@@ -40,7 +41,9 @@
 		<ButtonText name="$parentText" justifyH="LEFT" justifyV="MIDDLE" >
 			<Anchors>
 				<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT">
-					<Offset><AbsDimension x="25" y="0"/></Offset>
+					<Offset>
+            <AbsDimension x="25" y="0"/>
+          </Offset>
 				</Anchor>
 			</Anchors>
 		</ButtonText>
@@ -98,7 +101,7 @@
     <!-- how much button moves then pushed -->
 		<PushedTextOffset>
 			<AbsDimension x="0" y="0" />
-        </PushedTextOffset>
+    </PushedTextOffset>
 	</Button>
 
 </Ui>

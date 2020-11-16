@@ -1,9 +1,35 @@
 <Bindings>
-  <!-- Just som test with bindings -->
-	<Binding name="BarAssistShowFrame" runOnUp="true" header="BARASSIST">
-		BarAssistShowFrame();
+	<Binding name="BarAssistShowFramer:LeftButton" runOnUp="true" header="BARASSIST" category="ADDONS">
+    <!-- Not working in combat at the moment -->
+    <!--
+    if (keystate == "down") then
+      if getglobal("BA_Menu"):IsVisible() then
+        getglobal("BA_Menu"):Hide();
+      else
+        getglobal("BA_Menu"):Show();
+      end
+    end -->
+    -- dummy
 	</Binding>
-	<Binding name="BarAssistButton1" runonUp="true">
-		if(keystate=="down") then local button = getglobal("BarAssistButton1"); UseAction(button:GetID(), 0, onSelf); end
+	<Binding name="BarAssistButton0binding" runonUp="true" category="ADDONS">
+    <!--
+    example code to use in lua
+
+    local key1, key2 = GetBindingKey("BarAssistButton0binding")
+    local spellName = GetSpellInfo(typeID)
+    if key1 and spellName then
+      SetBindingSpell(key1, spellName)
+    end
+
+    if key2 and spellName then
+      SetBindingSpell(key2, spellName)
+    end -->
+    -- dummy
+	</Binding>
+  <Binding name="BarAssistButton1binding" runonUp="true" category="ADDONS">
+    -- dummy
+	</Binding>
+  <Binding name="BarAssistButton2binding" runonUp="true" category="ADDONS">
+    -- dummy
 	</Binding>
 </Bindings>
